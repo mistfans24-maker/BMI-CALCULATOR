@@ -3,16 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Healthy Diet Generator</title>
+<title>Fitness Tracker</title>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gradient-to-br from-green-50 to-blue-50 min-h-screen flex items-center justify-center p-4 font-sans">
 
-<div class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-3xl">
-  <h1 class="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-    Healthy Diet Generator
-  </h1>
+<!-- Landing Page -->
+<div id="homePage" class="w-full max-w-3xl bg-white p-8 rounded-2xl shadow-xl text-center">
+  <h1 class="text-4xl font-bold mb-6 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">Fitness Tracker</h1>
+  <p class="mb-6">Track your BMI, diet, exercise, and sleep to reach your health goals. Balanced nutrition, regular workouts, and proper sleep are essential for a healthy life.</p>
+  <button onclick="showSection('bmiPage')" class="bg-gradient-to-r from-green-500 to-blue-600 text-white py-3 px-6 rounded-xl font-semibold hover:opacity-90">Learn More</button>
+</div>
 
+<!-- BMI & Diet Page -->
+<div id="bmiPage" class="hidden w-full max-w-3xl bg-white p-6 sm:p-8 rounded-2xl shadow-xl">
+  <h1 class="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">BMI & Diet Plan</h1>
   <form id="dietForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <input id="name" type="text" placeholder="Full Name" required class="p-3 border rounded-xl col-span-2" />
     <input id="age" type="number" placeholder="Age" required min="1" max="120" class="p-3 border rounded-xl" />
@@ -42,9 +47,19 @@
       <option>Vegan</option>
       <option>High Protein</option>
     </select>
-    <button type="submit" class="col-span-2 bg-gradient-to-r from-green-500 to-blue-600 text-white py-3 rounded-xl font-semibold hover:opacity-90">
-      Generate My Plan
-    </button>
+    <select id="gym" required class="p-3 border rounded-xl">
+      <option value="">Gym Access</option>
+      <option>Yes</option>
+      <option>No</option>
+    </select>
+    <select id="exerciseLevel" required class="p-3 border rounded-xl">
+      <option value="">Exercise Level</option>
+      <option>Low</option>
+      <option>Moderate</option>
+      <option>High</option>
+    </select>
+    <input id="targetWeight" type="number" placeholder="Target Weight (kg)" required class="p-3 border rounded-xl" />
+    <button type="submit" class="col-span-2 bg-gradient-to-r from-green-500 to-blue-600 text-white py-3 rounded-xl font-semibold hover:opacity-90">Generate My Plan</button>
   </form>
 
   <div id="resultSection" class="hidden mt-6 space-y-4">
@@ -53,182 +68,169 @@
       <p id="caloriesValue" class="font-bold text-blue-600 text-lg"></p>
     </div>
     <div id="dietPlan" class="space-y-4"></div>
-    <button onclick="restart()" class="bg-gray-500 text-white py-2 px-4 rounded-xl hover:bg-gray-600">
-      New Plan
-    </button>
+    <div class="flex gap-4 mt-4">
+      <button onclick="showSection('homePage')" class="bg-gray-500 text-white py-2 px-4 rounded-xl hover:bg-gray-600 flex-1">New Diet Plan</button>
+      <button onclick="showSection('sleepPage')" class="bg-blue-500 text-white py-2 px-4 rounded-xl hover:bg-blue-600 flex-1">Track My Sleep</button>
+      <button onclick="showSection('exercisePage')" class="bg-green-500 text-white py-2 px-4 rounded-xl hover:bg-green-600 flex-1">How Should I Exercise</button>
+    </div>
   </div>
 </div>
 
+<!-- Sleep Tracker -->
+<div id="sleepPage" class="hidden w-full max-w-3xl bg-white p-6 sm:p-8 rounded-2xl shadow-xl">
+  <h1 class="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Sleep Tracker</h1>
+  <div id="sleepPlan" class="space-y-4"></div>
+  <button onclick="showSection('bmiPage')" class="mt-4 bg-gray-500 text-white py-2 px-4 rounded-xl hover:bg-gray-600">Back to BMI</button>
+</div>
+
+<!-- Exercise Plan -->
+<div id="exercisePage" class="hidden w-full max-w-3xl bg-white p-6 sm:p-8 rounded-2xl shadow-xl">
+  <h1 class="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">Exercise Plan</h1>
+  <div id="exercisePlan" class="space-y-4"></div>
+  <button onclick="showSection('bmiPage')" class="mt-4 bg-gray-500 text-white py-2 px-4 rounded-xl hover:bg-gray-600">Back to BMI</button>
+</div>
+
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("dietForm");
-
-  const mealsData = {
-    "Balanced": {
-      "Underweight": {
-        breakfast: ["Oatmeal with Banana", "Smoothie with Yogurt", "Scrambled Eggs with Toast"],
-        lunch: ["Grilled Chicken with Rice", "Turkey Sandwich", "Salmon with Quinoa"],
-        snack: ["Greek Yogurt", "Nuts Mix", "Fruit Bowl"],
-        dinner: ["Baked Fish with Veggies", "Chicken Stir Fry", "Turkey Meatballs with Veggies"]
-      },
-      "Normal": {
-        breakfast: ["Scrambled Eggs", "Veggie Omelette", "Smoothie Bowl"],
-        lunch: ["Grilled Veggies with Quinoa", "Chicken Salad", "Pasta with Veggies"],
-        snack: ["Fruit Bowl", "Nuts Mix", "Yogurt"],
-        dinner: ["Grilled Chicken with Veggies", "Salmon with Veggies", "Stir Fry Tofu & Veggies"]
-      },
-      "Overweight": {
-        breakfast: ["Smoothie with Protein Powder", "Oatmeal with Berries", "Egg Whites Omelette"],
-        lunch: ["Salad with Lean Protein", "Quinoa Veggie Bowl", "Chicken Lettuce Wraps"],
-        snack: ["Nuts", "Protein Bar", "Fruit Bowl"],
-        dinner: ["Grilled Fish with Veggies", "Stir Fry Chicken & Veggies", "Baked Tofu & Veggies"]
-      },
-      "Obese": {
-        breakfast: ["Vegetable Soup", "Egg Whites Omelette", "Smoothie with Greens"],
-        lunch: ["Salad with Protein", "Steamed Veggies & Tofu", "Grilled Chicken Salad"],
-        snack: ["Fruit Bowl", "Vegetable Sticks", "Nuts"],
-        dinner: ["Steamed Veggies & Fish", "Salad with Protein", "Vegetable Stir Fry"]
-      }
-    },
-    "Vegetarian": {
-      "Underweight": {
-        breakfast: ["Oatmeal with Almonds", "Smoothie with Yogurt", "Avocado Toast"],
-        lunch: ["Paneer Curry with Rice", "Veggie Sandwich", "Lentil Soup with Bread"],
-        snack: ["Fruit Bowl", "Greek Yogurt", "Nuts Mix"],
-        dinner: ["Veggie Stir Fry with Tofu", "Paneer Salad", "Lentil Curry with Veggies"]
-      },
-      "Normal": {
-        breakfast: ["Scrambled Tofu", "Veggie Omelette", "Smoothie Bowl"],
-        lunch: ["Veggie Pasta", "Salad with Chickpeas", "Quinoa Veggie Bowl"],
-        snack: ["Fruit Bowl", "Nuts Mix", "Yogurt"],
-        dinner: ["Lentil Soup", "Grilled Veggies with Paneer", "Veggie Stir Fry"]
-      },
-      "Overweight": {
-        breakfast: ["Smoothie with Protein Powder", "Oatmeal with Berries", "Avocado Toast"],
-        lunch: ["Salad with Chickpeas", "Quinoa Veggie Bowl", "Veggie Lettuce Wraps"],
-        snack: ["Nuts", "Protein Bar", "Fruit Bowl"],
-        dinner: ["Steamed Veggies & Tofu", "Salad with Lentils", "Veggie Stir Fry"]
-      },
-      "Obese": {
-        breakfast: ["Vegetable Soup", "Scrambled Tofu", "Smoothie with Greens"],
-        lunch: ["Salad with Tofu", "Steamed Veggies & Lentils", "Veggie Salad"],
-        snack: ["Fruit Bowl", "Vegetable Sticks", "Nuts"],
-        dinner: ["Steamed Veggies & Tofu", "Salad with Lentils", "Veggie Stir Fry"]
-      }
-    },
-    "Vegan": {
-      "Underweight": {
-        breakfast: ["Oatmeal with Almonds", "Smoothie with Soy Milk", "Tofu Scramble"],
-        lunch: ["Tofu Curry with Rice", "Veggie Sandwich", "Lentil Soup with Bread"],
-        snack: ["Fruit Bowl", "Nuts Mix", "Vegan Yogurt"],
-        dinner: ["Veggie Stir Fry with Tofu", "Lentil Curry with Veggies", "Grilled Veggies with Quinoa"]
-      },
-      "Normal": {
-        breakfast: ["Tofu Scramble", "Smoothie Bowl", "Avocado Toast"],
-        lunch: ["Vegan Pasta", "Salad with Beans", "Quinoa Veggie Bowl"],
-        snack: ["Fruit Bowl", "Nuts Mix", "Vegan Yogurt"],
-        dinner: ["Grilled Veggies with Tofu", "Lentil Soup", "Veggie Stir Fry"]
-      },
-      "Overweight": {
-        breakfast: ["Smoothie with Protein Powder", "Oatmeal with Berries", "Avocado Toast"],
-        lunch: ["Salad with Beans", "Quinoa Veggie Bowl", "Veggie Lettuce Wraps"],
-        snack: ["Nuts", "Protein Bar", "Fruit Bowl"],
-        dinner: ["Steamed Veggies & Tofu", "Salad with Lentils", "Veggie Stir Fry"]
-      },
-      "Obese": {
-        breakfast: ["Vegetable Soup", "Tofu Scramble", "Smoothie with Greens"],
-        lunch: ["Salad with Lentils", "Steamed Veggies & Quinoa", "Veggie Salad"],
-        snack: ["Fruit Bowl", "Vegetable Sticks", "Nuts"],
-        dinner: ["Steamed Veggies & Tofu", "Salad with Lentils", "Veggie Stir Fry"]
-      }
-    },
-    "High Protein": {
-      "Underweight": {
-        breakfast: ["Egg Whites Omelette", "Protein Smoothie", "Greek Yogurt with Nuts"],
-        lunch: ["Grilled Chicken with Rice", "Turkey Sandwich", "Salmon with Quinoa"],
-        snack: ["Protein Bar", "Nuts Mix", "Boiled Eggs"],
-        dinner: ["Salmon with Veggies", "Grilled Chicken with Veggies", "Turkey Meatballs"]
-      },
-      "Normal": {
-        breakfast: ["Eggs", "Protein Smoothie", "Oatmeal with Protein Powder"],
-        lunch: ["Turkey + Quinoa", "Chicken Salad", "Grilled Fish with Veggies"],
-        snack: ["Protein Shake", "Nuts Mix", "Boiled Eggs"],
-        dinner: ["Grilled Fish with Veggies", "Chicken Stir Fry", "Egg White Omelette"]
-      },
-      "Overweight": {
-        breakfast: ["Egg Whites Omelette", "Protein Smoothie", "Oatmeal with Berries"],
-        lunch: ["Chicken Salad", "Grilled Protein with Veggies", "Turkey Lettuce Wraps"],
-        snack: ["Protein Bar", "Nuts Mix", "Boiled Eggs"],
-        dinner: ["Grilled Fish with Veggies", "Steamed Chicken & Veggies", "Stir Fry Tofu & Protein"]
-      },
-      "Obese": {
-        breakfast: ["Protein Smoothie", "Egg Whites Omelette", "Vegetable Soup"],
-        lunch: ["Salad with Chicken", "Steamed Fish & Veggies", "Salad with Tofu"],
-        snack: ["Nuts Mix", "Protein Bar", "Fruit Bowl"],
-        dinner: ["Steamed Fish & Veggies", "Salad with Protein", "Veggie Stir Fry"]
-      }
-    }
-  };
-
-  function getRandomMeal(meals) {
-    return meals[Math.floor(Math.random() * meals.length)];
-  }
-
-  form.addEventListener("submit", function(e) {
-    e.preventDefault();
-
-    const name = document.getElementById("name").value.trim();
-    const age = parseFloat(document.getElementById("age").value);
-    const gender = document.getElementById("gender").value;
-    const height = parseFloat(document.getElementById("height").value);
-    const weight = parseFloat(document.getElementById("weight").value);
-    const activity = document.getElementById("activity").value;
-    const goal = document.getElementById("goal").value;
-    const diet = document.getElementById("diet").value;
-
-    // Hide form, show results
-    document.getElementById("dietForm").classList.add("hidden");
-    document.getElementById("resultSection").classList.remove("hidden");
-
-    // BMI calculation
-    const bmi = weight / ((height / 100) ** 2);
-    const category = bmi < 18.5 ? "Underweight" : bmi < 25 ? "Normal" : bmi < 30 ? "Overweight" : "Obese";
-    document.getElementById("bmiDescription").textContent = `BMI: ${bmi.toFixed(1)} (${category})`;
-
-    // Calories calculation
-    let bmr = gender === "Male" ? 88.36 + 13.4*weight + 4.8*height - 5.7*age
-                                : 447.6 + 9.2*weight + 3.1*height - 4.3*age;
-    const activityFactor = activity==="Low" ? 1.2 : activity==="Moderate" ? 1.55 : 1.725;
-    let calories = Math.max(1200, Math.round(bmr * activityFactor + (goal.includes("Lose")?-500:goal.includes("Gain")?300:0)));
-    document.getElementById("caloriesValue").textContent = `Calories: ${calories} kcal/day`;
-
-    // Build 7-day plan
-    const dietPlanContainer = document.getElementById("dietPlan");
-    dietPlanContainer.innerHTML = "";
-    for (let day = 1; day <= 7; day++) {
-      const dayPlan = mealsData[diet][category];
-      const card = document.createElement("div");
-      card.className = "p-4 rounded-xl shadow-md bg-white";
-      card.innerHTML = `
-        <h2 class="font-bold text-lg mb-2 text-green-600">Day ${day}</h2>
-        <ul class="list-disc pl-5 space-y-1">
-          <li><b>Breakfast:</b> ${getRandomMeal(dayPlan.breakfast)}</li>
-          <li><b>Lunch:</b> ${getRandomMeal(dayPlan.lunch)}</li>
-          <li><b>Snack:</b> ${getRandomMeal(dayPlan.snack)}</li>
-          <li><b>Dinner:</b> ${getRandomMeal(dayPlan.dinner)}</li>
-        </ul>
-        <p class="mt-2 font-semibold">Estimated Calories: ${calories}</p>
-      `;
-      dietPlanContainer.appendChild(card);
-    }
+function showSection(sectionId){
+  ['homePage','bmiPage','sleepPage','exercisePage'].forEach(id => {
+    document.getElementById(id).classList.add('hidden');
   });
-});
-
-function restart() {
-  document.getElementById("dietForm").classList.remove("hidden");
-  document.getElementById("resultSection").classList.add("hidden");
-  document.getElementById("dietForm").reset();
+  document.getElementById(sectionId).classList.remove('hidden');
 }
+
+// Diet, sleep, exercise data
+const mealsData = {
+  "Balanced":[
+    {breakfast:"Oatmeal with Banana", lunch:"Grilled Chicken with Rice", snack:"Fruit Bowl", dinner:"Baked Fish with Veggies"},
+    {breakfast:"Scrambled Eggs", lunch:"Chicken Salad", snack:"Greek Yogurt", dinner:"Stir Fry Tofu & Veggies"},
+    {breakfast:"Smoothie Bowl", lunch:"Pasta with Veggies", snack:"Nuts Mix", dinner:"Chicken Stir Fry"},
+    {breakfast:"Eggs & Toast", lunch:"Salmon with Quinoa", snack:"Fruit Bowl", dinner:"Grilled Chicken"},
+    {breakfast:"Pancakes with Berries", lunch:"Turkey Sandwich", snack:"Yogurt", dinner:"Baked Fish"},
+    {breakfast:"Avocado Toast", lunch:"Veggie Bowl", snack:"Nuts Mix", dinner:"Salmon with Veggies"},
+    {breakfast:"Greek Yogurt & Granola", lunch:"Quinoa Salad", snack:"Fruit Bowl", dinner:"Chicken Meatballs"}
+  ],
+  "Vegetarian":[
+    {breakfast:"Oatmeal with Almonds", lunch:"Paneer Curry with Rice", snack:"Fruit Bowl", dinner:"Veggie Stir Fry with Tofu"},
+    {breakfast:"Scrambled Tofu", lunch:"Veggie Pasta", snack:"Nuts Mix", dinner:"Lentil Soup"},
+    {breakfast:"Smoothie Bowl", lunch:"Quinoa Veggie Bowl", snack:"Yogurt", dinner:"Paneer Salad"},
+    {breakfast:"Veggie Omelette", lunch:"Salad with Chickpeas", snack:"Fruit Bowl", dinner:"Veggie Stir Fry"},
+    {breakfast:"Avocado Toast", lunch:"Lentil Soup", snack:"Nuts Mix", dinner:"Paneer Curry"},
+    {breakfast:"Greek Yogurt", lunch:"Quinoa Salad", snack:"Fruit Bowl", dinner:"Veggie Stir Fry"},
+    {breakfast:"Oatmeal with Berries", lunch:"Veggie Sandwich", snack:"Nuts", dinner:"Paneer Salad"}
+  ],
+  "Vegan":[
+    {breakfast:"Oatmeal with Almonds", lunch:"Tofu Curry with Rice", snack:"Fruit Bowl", dinner:"Veggie Stir Fry with Tofu"},
+    {breakfast:"Tofu Scramble", lunch:"Vegan Pasta", snack:"Nuts Mix", dinner:"Lentil Soup"},
+    {breakfast:"Smoothie Bowl", lunch:"Quinoa Veggie Bowl", snack:"Vegan Yogurt", dinner:"Grilled Veggies with Tofu"},
+    {breakfast:"Avocado Toast", lunch:"Salad with Beans", snack:"Fruit Bowl", dinner:"Veggie Stir Fry"},
+    {breakfast:"Oatmeal with Berries", lunch:"Veggie Sandwich", snack:"Nuts", dinner:"Lentil Soup"},
+    {breakfast:"Tofu Omelette", lunch:"Vegan Pasta", snack:"Fruit Bowl", dinner:"Quinoa Salad"},
+    {breakfast:"Smoothie with Soy Milk", lunch:"Quinoa Bowl", snack:"Nuts Mix", dinner:"Veggie Stir Fry"}
+  ],
+  "High Protein":[
+    {breakfast:"Egg Whites Omelette", lunch:"Grilled Chicken with Rice", snack:"Protein Bar", dinner:"Salmon with Veggies"},
+    {breakfast:"Protein Smoothie", lunch:"Turkey Sandwich", snack:"Boiled Eggs", dinner:"Chicken Stir Fry"},
+    {breakfast:"Oatmeal with Protein Powder", lunch:"Chicken Salad", snack:"Nuts Mix", dinner:"Egg White Omelette"},
+    {breakfast:"Eggs & Toast", lunch:"Salmon with Quinoa", snack:"Protein Shake", dinner:"Grilled Chicken"},
+    {breakfast:"Greek Yogurt with Nuts", lunch:"Quinoa Salad", snack:"Boiled Eggs", dinner:"Turkey Meatballs"},
+    {breakfast:"Smoothie with Protein Powder", lunch:"Grilled Fish", snack:"Nuts Mix", dinner:"Chicken Stir Fry"},
+    {breakfast:"Egg Whites Omelette", lunch:"Chicken Lettuce Wraps", snack:"Protein Bar", dinner:"Steamed Fish & Veggies"}
+  ]
+};
+
+// Exercise & sleep data templates
+const exercises = {
+  "Low":["10 min walking","Stretching 15 min","Light Yoga 20 min","Bodyweight Squats 10 min","Light Cardio 15 min","Pilates 20 min","Rest & Light Walk 15 min"],
+  "Moderate":["Jog 20 min","Strength Training 30 min","Yoga 30 min","Cycling 25 min","Bodyweight Circuit 20 min","HIIT 15 min","Rest & Stretch 20 min"],
+  "High":["Run 30 min","Weight Lifting 45 min","HIIT 30 min","Cycling 45 min","Strength Circuit 40 min","Kickboxing 30 min","Active Recovery 30 min"]
+};
+
+const sleepHours = {
+  "Underweight":[9,9,9,9,9,9,9],
+  "Normal":[7,7,7,7,7,7,7],
+  "Overweight":[8,8,8,8,8,8,8],
+  "Obese":[8,8,8,8,8,8,8]
+};
+
+document.getElementById("dietForm").addEventListener("submit", function(e){
+  e.preventDefault();
+
+  const name = document.getElementById("name").value.trim();
+  const age = parseFloat(document.getElementById("age").value);
+  const gender = document.getElementById("gender").value;
+  const height = parseFloat(document.getElementById("height").value);
+  const weight = parseFloat(document.getElementById("weight").value);
+  const activity = document.getElementById("activity").value;
+  const goal = document.getElementById("goal").value;
+  const diet = document.getElementById("diet").value;
+  const gym = document.getElementById("gym").value;
+  const exerciseLevel = document.getElementById("exerciseLevel").value;
+  const targetWeight = parseFloat(document.getElementById("targetWeight").value);
+
+  // BMI
+  const bmi = weight / ((height/100)**2);
+  const category = bmi<18.5?"Underweight":bmi<25?"Normal":bmi<30?"Overweight":"Obese";
+
+  // Calories
+  let bmr = gender==="Male"? 88.36 + 13.4*weight + 4.8*height - 5.7*age
+                           : 447.6 + 9.2*weight + 3.1*height - 4.3*age;
+  const activityFactor = activity==="Low"?1.2:activity==="Moderate"?1.55:1.725;
+  let calories = Math.max(1200, Math.round(bmr*activityFactor + (goal.includes("Lose")?-500:goal.includes("Gain")?300:0)));
+
+  document.getElementById("bmiDescription").textContent = `BMI: ${bmi.toFixed(1)} (${category})`;
+  document.getElementById("caloriesValue").textContent = `Calories: ${calories} kcal/day`;
+
+  // Diet Plan
+  const dietPlanContainer = document.getElementById("dietPlan");
+  dietPlanContainer.innerHTML="";
+  mealsData[diet].forEach((dayMeal, idx)=>{
+    const card = document.createElement("div");
+    card.className="p-4 rounded-xl shadow-md bg-white";
+    card.innerHTML=`
+      <h2 class="font-bold text-lg mb-2 text-green-600">Day ${idx+1}</h2>
+      <ul class="list-disc pl-5 space-y-1">
+        <li><b>Breakfast:</b> ${dayMeal.breakfast}</li>
+        <li><b>Lunch:</b> ${dayMeal.lunch}</li>
+        <li><b>Snack:</b> ${dayMeal.snack}</li>
+        <li><b>Dinner:</b> ${dayMeal.dinner}</li>
+      </ul>
+      <p class="mt-2 font-semibold">Estimated Calories: ${calories}</p>
+    `;
+    dietPlanContainer.appendChild(card);
+  });
+
+  // Sleep Plan
+  const sleepContainer = document.getElementById("sleepPlan");
+  sleepContainer.innerHTML="";
+  sleepHours[category].forEach((hours, idx)=>{
+    const div=document.createElement("div");
+    div.className="p-4 rounded-xl shadow-md bg-white";
+    div.innerHTML=`
+      <h2 class="font-bold text-lg mb-2 text-purple-600">Day ${idx+1}</h2>
+      <p>Recommended Sleep: ${hours} hours</p>
+      <p>Reasoning: Ensures optimal recovery, hormonal balance, and energy to support your diet and exercise plan.</p>
+    `;
+    sleepContainer.appendChild(div);
+  });
+
+  // Exercise Plan
+  const exerciseContainer = document.getElementById("exercisePlan");
+  exerciseContainer.innerHTML="";
+  exercises[exerciseLevel].forEach((exercise, idx)=>{
+    const div=document.createElement("div");
+    div.className="p-4 rounded-xl shadow-md bg-white";
+    div.innerHTML=`
+      <h2 class="font-bold text-lg mb-2 text-orange-600">Day ${idx+1}</h2>
+      <p>Exercise: ${exercise}</p>
+      <p>Reasoning: Supports your goal of ${goal}, complements your diet, and improves ${exerciseLevel==="Low"?"basic fitness":"strength and endurance"}.</p>
+      <p>Gym Access: ${gym}</p>
+    `;
+    exerciseContainer.appendChild(div);
+  });
+
+  showSection('bmiPage');
+  document.getElementById("resultSection").classList.remove("hidden");
+});
 </script>
 </body>
 </html>
